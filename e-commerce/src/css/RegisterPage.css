@@ -1,0 +1,156 @@
+.register-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.85) 0%, rgba(118, 75, 162, 0.85) 100%),
+              url('../images/e-ticaret.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  padding: 20px;
+  position: relative;
+}
+
+.register-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(3px);
+  z-index: 0;
+}
+
+.register-box {
+  position: relative;
+  z-index: 1;
+}
+
+.register-box {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  padding: 40px;
+  width: 100%;
+  max-width: 500px;
+  animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.register-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.register-header h1 {
+  color: #333;
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.register-header p {
+  color: #666;
+  font-size: 16px;
+  margin: 0;
+}
+
+.register-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.input-icon {
+  color: #667eea;
+  font-size: 18px;
+}
+
+.button-group {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+  margin-bottom: 16px;
+}
+
+.clear-button {
+  flex: 0 0 auto;
+  min-width: 110px !important;
+  padding: 8px 16px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+  border-radius: 8px !important;
+  border: 2px solid #667eea !important;
+  color: #667eea !important;
+  transition: all 0.2s ease !important;
+}
+
+.clear-button:hover {
+  background-color: rgba(102, 126, 234, 0.1) !important;
+  border-color: #764ba2 !important;
+  color: #764ba2 !important;
+  transform: translateY(-1px);
+}
+
+.register-button {
+  flex: 1;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
+  padding: 12px !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  border-radius: 10px !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.register-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4) !important;
+}
+
+.login-link {
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+}
+
+.login-link a {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.login-link a:hover {
+  color: #764ba2;
+  text-decoration: underline;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  .register-box {
+    padding: 30px 20px;
+  }
+
+  .register-header h1 {
+    font-size: 26px;
+  }
+
+  .register-header p {
+    font-size: 14px;
+  }
+}
