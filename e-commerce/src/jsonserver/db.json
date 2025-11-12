@@ -1,0 +1,22 @@
+{
+  "users": [
+    {
+      "id": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+      "fullName": "Yusuf Batmaz",
+      "email": "yusuf@example.com",
+      "phone": "5551234567",
+      "password": "Yusuf123",
+      "budget": 10000,
+      "createdAt": "2024-01-15T10:30:00.000Z"
+    },
+    {
+      "id": "a4e2",
+      "fullName": "A B",
+      "email": "aliVeli@gmail.com",
+      "phone": "5645651212",
+      "password": "Asd123",
+      "budget": 5000,
+      "createdAt": "2025-11-12T17:47:01.316Z"
+    }
+  ]
+}

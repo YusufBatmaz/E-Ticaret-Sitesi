@@ -1,18 +1,71 @@
 import { useState } from 'react';
 import { TextField, Button, InputAdornment, IconButton } from '@mui/material';
 import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash, FaPhone, FaEraser } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useFormik } from 'formik';
+import { toast } from 'react-toastify';
+import { RegisterPageSchema } from '../schemas/RegisterPageSchema';
+import { registerUser, checkEmailExists, checkPhoneExists } from '../services/RegisterPageService';
+import { useAppDispatch, useAppSelector } from '../redux/hooks';
+import { setLoading } from '../redux/appSlice';
+import Spinner from '../components/Spinner';
 import '../css/RegisterPage.css';
 
 function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    phone: '',
-    password: '',
-    confirmPassword: ''
+  const dispatch = useAppDispatch();
+  const loading = useAppSelector((state) => state.app.isLoading);
+  const navigate = useNavigate();
+
+  const formik = useFormik({
+    initialValues: {
+      fullName: '',
+      email: '',
+      phone: '',
+      password: '',
+      confirmPassword: ''
+    },
+    validationSchema: RegisterPageSchema,
+    onSubmit: async (values) => {
+      dispatch(setLoading(true));
+      try {
+        // E-posta kontrolü
+        const emailExists = await checkEmailExists(values.email);
+        if (emailExists) {
+          dispatch(setLoading(false));
+          toast.error('Bu e-posta adresi zaten kayıtlı!');
+          return;
+        }
+
+        // Telefon kontrolü
+        const phoneExists = await checkPhoneExists(values.phone);
+        if (phoneExists) {
+          dispatch(setLoading(false));
+          toast.error('Bu telefon numarası zaten kayıtlı!');
+          return;
+        }
+
+        // Kullanıcı kaydı
+        const result = await registerUser(values);
+
+        if (result.success) {
+          toast.success('Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz...');
+          formik.resetForm();
+          setTimeout(() => {
+            dispatch(setLoading(false));
+            navigate('/login');
+          }, 2000);
+        } else {
+          dispatch(setLoading(false));
+          toast.error(result.error || 'Kayıt sırasında bir hata oluştu.');
+        }
+      } catch (error) {
+        dispatch(setLoading(false));
+        console.error('Kayıt hatası:', error);
+        toast.error('Kayıt sırasında bir hata oluştu. Lütfen tekrar deneyin.');
+      }
+    }
   });
 
   const handleTogglePassword = () => {
@@ -23,59 +76,40 @@ function RegisterPage() {
     setShowConfirmPassword(!showConfirmPassword);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
-
   const handleClear = () => {
-    setFormData({
-      fullName: '',
-      email: '',
-      phone: '',
-      password: '',
-      confirmPassword: ''
-    });
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (formData.password !== formData.confirmPassword) {
-      alert('Şifreler eşleşmiyor!');
-      return;
-    }
-    
-    console.log('Register data:', formData);
-    // Kayıt işlemleri burada yapılacak
+    formik.resetForm();
   };
 
   return (
-    <div className="register-container">
-      <div className="register-box">
+    <>
+      <Spinner loading={loading} />
+      <div className="register-container">
+        <div className="register-box">
         <div className="register-header">
           <h1>Hesap Oluştur</h1>
           <p>Hemen üye olun ve alışverişe başlayın</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="register-form">
+        <form onSubmit={formik.handleSubmit} className="register-form">
           <TextField
             fullWidth
             label="Ad Soyad"
             name="fullName"
             type="text"
-            value={formData.fullName}
-            onChange={handleChange}
+            value={formik.values.fullName}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.fullName && Boolean(formik.errors.fullName)}
+            helperText={formik.touched.fullName && formik.errors.fullName}
             variant="outlined"
-            required
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <FaUser className="input-icon" />
-                </InputAdornment>
-              ),
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <FaUser className="input-icon" />
+                  </InputAdornment>
+                ),
+              }
             }}
             sx={{ marginBottom: 2 }}
           />
@@ -85,16 +119,20 @@ function RegisterPage() {
             label="E-posta"
             name="email"
             type="email"
-            value={formData.email}
-            onChange={handleChange}
+            value={formik.values.email}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.email && Boolean(formik.errors.email)}
+            helperText={formik.touched.email && formik.errors.email}
             variant="outlined"
-            required
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <FaEnvelope className="input-icon" />
-                </InputAdornment>
-              ),
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <FaEnvelope className="input-icon" />
+                  </InputAdornment>
+                ),
+              }
             }}
             sx={{ marginBottom: 2 }}
           />
@@ -104,16 +142,21 @@ function RegisterPage() {
             label="Telefon"
             name="phone"
             type="tel"
-            value={formData.phone}
-            onChange={handleChange}
+            value={formik.values.phone}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.phone && Boolean(formik.errors.phone)}
+            helperText={formik.touched.phone && formik.errors.phone}
             variant="outlined"
-            required
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <FaPhone className="input-icon" />
-                </InputAdornment>
-              ),
+            placeholder="5551234567"
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <FaPhone className="input-icon" />
+                  </InputAdornment>
+                ),
+              }
             }}
             sx={{ marginBottom: 2 }}
           />
@@ -123,27 +166,31 @@ function RegisterPage() {
             label="Şifre"
             name="password"
             type={showPassword ? 'text' : 'password'}
-            value={formData.password}
-            onChange={handleChange}
+            value={formik.values.password}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.password && Boolean(formik.errors.password)}
+            helperText={formik.touched.password && formik.errors.password}
             variant="outlined"
-            required
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <FaLock className="input-icon" />
-                </InputAdornment>
-              ),
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    onClick={handleTogglePassword}
-                    edge="end"
-                    aria-label="toggle password visibility"
-                  >
-                    {showPassword ? <FaEyeSlash /> : <FaEye />}
-                  </IconButton>
-                </InputAdornment>
-              ),
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <FaLock className="input-icon" />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={handleTogglePassword}
+                      edge="end"
+                      aria-label="toggle password visibility"
+                    >
+                      {showPassword ? <FaEyeSlash /> : <FaEye />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }
             }}
             sx={{ marginBottom: 2 }}
           />
@@ -153,27 +200,31 @@ function RegisterPage() {
             label="Şifre Tekrar"
             name="confirmPassword"
             type={showConfirmPassword ? 'text' : 'password'}
-            value={formData.confirmPassword}
-            onChange={handleChange}
+            value={formik.values.confirmPassword}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.confirmPassword && Boolean(formik.errors.confirmPassword)}
+            helperText={formik.touched.confirmPassword && formik.errors.confirmPassword}
             variant="outlined"
-            required
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <FaLock className="input-icon" />
-                </InputAdornment>
-              ),
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    onClick={handleToggleConfirmPassword}
-                    edge="end"
-                    aria-label="toggle confirm password visibility"
-                  >
-                    {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
-                  </IconButton>
-                </InputAdornment>
-              ),
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <FaLock className="input-icon" />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={handleToggleConfirmPassword}
+                      edge="end"
+                      aria-label="toggle confirm password visibility"
+                    >
+                      {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }
             }}
             sx={{ marginBottom: 2 }}
           />
@@ -193,8 +244,9 @@ function RegisterPage() {
               type="submit"
               variant="contained"
               className="register-button"
+              disabled={formik.isSubmitting}
             >
-              Kayıt Ol
+              {formik.isSubmitting ? 'Kaydediliyor...' : 'Kayıt Ol'}
             </Button>
           </div>
 
@@ -205,6 +257,7 @@ function RegisterPage() {
         </form>
       </div>
     </div>
+    </>
   );
 }
 
