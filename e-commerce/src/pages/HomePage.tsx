@@ -1,9 +1,12 @@
-import React from 'react'
+import ProductList from '../components/ProductList';
+import '../css/HomePage.css';
 
 function HomePage() {
   return (
-    <div>HomePage</div>
-  )
+    <div className="home-page">
+      <ProductList />
+    </div>
+  );
 }
 
-export default HomePage
+export default HomePage;
