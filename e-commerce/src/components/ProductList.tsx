@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Grid, Container, Typography, Box, CircularProgress, Alert } from '@mui/material';
 import { toast } from 'react-toastify';
 import ProductCard from './ProductCard';
+import Category from './Category';
 import { getAllProducts } from '../services/ProductService';
 import { useAppDispatch, useAppSelector } from '../redux/hooks';
 import { setLoading } from '../redux/appSlice';
@@ -9,6 +10,8 @@ import type { ProductType } from '../types/Types';
 
 function ProductList() {
   const [products, setProducts] = useState<ProductType[]>([]);
+  const [allProducts, setAllProducts] = useState<ProductType[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [error, setError] = useState<string>('');
   const dispatch = useAppDispatch();
   const loading = useAppSelector((state) => state.app.isLoading);
@@ -27,6 +30,7 @@ function ProductList() {
       
       if (result.success && result.data) {
         console.log(`${result.data.length} ürün başarıyla yüklendi`);
+        setAllProducts(result.data);
         setProducts(result.data);
         setError('');
       } else {
@@ -40,6 +44,22 @@ function ProductList() {
       toast.error('Ürünler yüklenirken bir hata oluştu');
     } finally {
       dispatch(setLoading(false));
+    }
+  };
+
+  const handleCategoryChange = (categories: string[]) => {
+    setSelectedCategories(categories);
+    
+    if (categories.length === 0) {
+      // Hiç kategori seçilmemişse tüm ürünleri göster
+      setProducts(allProducts);
+    } else {
+      // Seçili kategorilere göre filtrele
+      const filtered = allProducts.filter(product => 
+        categories.includes(product.category)
+      );
+      setProducts(filtered);
+      console.log(`${filtered.length} ürün filtrelendi`);
     }
   };
 
@@ -78,25 +98,15 @@ function ProductList() {
 
   return (
     <Container maxWidth={false} sx={{ py: 4, px: { xs: 2, sm: 3, md: 4, lg: 6 } }}>
-      <Box sx={{ mb: 4, textAlign: 'center' }}>
-        <Typography 
-          variant="h3" 
-          component="h1" 
-          gutterBottom
-          sx={{ 
-            fontWeight: 700,
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent'
-          }}
-        >
-          Ürünlerimiz
-        </Typography>
-        <Typography variant="subtitle1" color="text.secondary">
-          {products.length} ürün bulundu
-        </Typography>
+      {/* Kategori Filtresi - Üstte, Yatay */}
+      <Box sx={{ mb: 3 }}>
+        <Category 
+          selectedCategories={selectedCategories}
+          onCategoryChange={handleCategoryChange}
+        />
       </Box>
 
+      {/* Ürünler - Tam Genişlik */}
       <Grid container spacing={3}>
         {products.map((product) => (
           <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3, xl: 2.4 }} key={product.id}>
@@ -107,6 +117,14 @@ function ProductList() {
           </Grid>
         ))}
       </Grid>
+
+      {products.length === 0 && !loading && (
+        <Box sx={{ textAlign: 'center', py: 8 }}>
+          <Typography variant="h6" color="text.secondary">
+            Seçili kategorilerde ürün bulunamadı
+          </Typography>
+        </Box>
+      )}
     </Container>
   );
 }
