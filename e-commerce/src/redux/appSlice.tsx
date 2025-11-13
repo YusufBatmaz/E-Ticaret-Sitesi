@@ -17,6 +17,9 @@ interface AppState {
   
   // Language State (opsiyonel)
   language: 'tr' | 'en';
+  
+  // Search State
+  searchQuery: string;
 }
 
 // Initial State
@@ -34,6 +37,9 @@ const initialState: AppState = {
   
   // Language
   language: 'tr',
+  
+  // Search
+  searchQuery: '',
 };
 
 // App Slice
@@ -134,6 +140,16 @@ const appSlice = createSlice({
         });
       }
     },
+    
+    // Search Actions
+    setSearchQuery: (state, action: PayloadAction<string>) => {
+      state.searchQuery = action.payload;
+      console.log('Arama sorgusu:', action.payload);
+    },
+    
+    clearSearchQuery: (state) => {
+      state.searchQuery = '';
+    },
   },
 });
 
@@ -149,6 +165,8 @@ export const {
   updateBudget,
   decreaseBudget,
   increaseBudget,
+  setSearchQuery,
+  clearSearchQuery,
 } = appSlice.actions;
 
 // Export Reducer

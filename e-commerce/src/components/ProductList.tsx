@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Grid, Container, Typography, Box, CircularProgress, Alert } from '@mui/material';
 import { toast } from 'react-toastify';
 import ProductCard from './ProductCard';
@@ -15,6 +15,7 @@ function ProductList() {
   const [error, setError] = useState<string>('');
   const dispatch = useAppDispatch();
   const loading = useAppSelector((state) => state.app.isLoading);
+  const searchQuery = useAppSelector((state) => state.app.searchQuery);
 
   useEffect(() => {
     console.log('ProductList component yüklendi, ürünler çekiliyor...');
@@ -47,20 +48,40 @@ function ProductList() {
     }
   };
 
+  const filterProducts = useCallback(() => {
+    if (allProducts.length === 0) return;
+
+    let filtered = [...allProducts];
+
+    // Kategori filtresi
+    if (selectedCategories.length > 0) {
+      filtered = filtered.filter(product => 
+        selectedCategories.includes(product.category)
+      );
+    }
+
+    // Arama filtresi
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(product =>
+        product.title.toLowerCase().includes(query) ||
+        product.description.toLowerCase().includes(query) ||
+        product.category.toLowerCase().includes(query)
+      );
+      console.log(`"${searchQuery}" araması için ${filtered.length} ürün bulundu`);
+    } else {
+      console.log('Arama temizlendi, tüm ürünler gösteriliyor');
+    }
+
+    setProducts(filtered);
+  }, [allProducts, selectedCategories, searchQuery]);
+
+  useEffect(() => {
+    filterProducts();
+  }, [filterProducts]);
+
   const handleCategoryChange = (categories: string[]) => {
     setSelectedCategories(categories);
-    
-    if (categories.length === 0) {
-      // Hiç kategori seçilmemişse tüm ürünleri göster
-      setProducts(allProducts);
-    } else {
-      // Seçili kategorilere göre filtrele
-      const filtered = allProducts.filter(product => 
-        categories.includes(product.category)
-      );
-      setProducts(filtered);
-      console.log(`${filtered.length} ürün filtrelendi`);
-    }
   };
 
   const handleAddToCart = (product: ProductType) => {
@@ -121,7 +142,9 @@ function ProductList() {
       {products.length === 0 && !loading && (
         <Box sx={{ textAlign: 'center', py: 8 }}>
           <Typography variant="h6" color="text.secondary">
-            Seçili kategorilerde ürün bulunamadı
+            {searchQuery 
+              ? `"${searchQuery}" için ürün bulunamadı` 
+              : 'Seçili kategorilerde ürün bulunamadı'}
           </Typography>
         </Box>
       )}

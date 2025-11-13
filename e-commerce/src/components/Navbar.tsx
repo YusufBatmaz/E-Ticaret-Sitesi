@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   AppBar, 
   Toolbar, 
@@ -16,11 +16,12 @@ import {
   FaCog, 
   FaSignOutAlt, 
   FaShoppingBag,
-  FaUser 
+  FaUser,
+  FaTimes
 } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../redux/hooks';
-import { logout } from '../redux/appSlice';
+import { logout, setSearchQuery, clearSearchQuery } from '../redux/appSlice';
 import { toast } from 'react-toastify';
 
 function Navbar() {
@@ -30,6 +31,11 @@ function Navbar() {
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.app.user);
   const isAuthenticated = useAppSelector((state) => state.app.isAuthenticated);
+  const searchQuery = useAppSelector((state) => state.app.searchQuery);
+
+  useEffect(() => {
+    setSearchValue(searchQuery);
+  }, [searchQuery]);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -54,9 +60,14 @@ function Navbar() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchValue.trim()) {
-      console.log('Arama yapılıyor:', searchValue);
-      toast.info(`"${searchValue}" için arama yapılıyor...`);
+      dispatch(setSearchQuery(searchValue.trim()));
+      toast.success(`"${searchValue.trim()}" için arama yapılıyor...`);
     }
+  };
+
+  const handleClearSearch = () => {
+    setSearchValue('');
+    dispatch(clearSearchQuery());
   };
 
   const handleLogoClick = () => {
@@ -129,6 +140,21 @@ function Navbar() {
               }
             }}
           />
+          {searchValue && (
+            <IconButton
+              size="small"
+              onClick={handleClearSearch}
+              sx={{ 
+                color: 'white',
+                ml: 1,
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.2)'
+                }
+              }}
+            >
+              <FaTimes size={14} />
+            </IconButton>
+          )}
         </Box>
 
         {/* Sağ Taraf - Ayarlar ve Çıkış */}
