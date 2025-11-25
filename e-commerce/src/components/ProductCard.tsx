@@ -1,26 +1,43 @@
 import { Card, CardContent, CardMedia, Typography, Button, Rating, Box } from '@mui/material';
-import { FaShoppingCart } from 'react-icons/fa';
+import { FaShoppingCart, FaEye } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { useAppDispatch } from '../redux/hooks';
+import { addToBasket } from '../redux/slices/basketSlice';
 import type { ProductType } from '../types/Types';
 
 interface ProductCardProps {
   product: ProductType;
-  onAddToCart?: (product: ProductType) => void;
 }
 
-function ProductCard({ product, onAddToCart }: ProductCardProps) {
-  const handleAddToCart = () => {
-    if (onAddToCart) {
-      onAddToCart(product);
-    }
+function ProductCard({ product }: ProductCardProps) {
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    dispatch(addToBasket({ product, quantity: 1 }));
+    toast.success(`${product.title} sepete eklendi!`);
+  };
+
+  const handleCardClick = () => {
+    navigate(`/product/${product.id}`);
+  };
+
+  const handleDetailClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate(`/product/${product.id}`);
   };
 
   return (
     <Card 
+      onClick={handleCardClick}
       sx={{ 
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
         transition: 'transform 0.2s, box-shadow 0.2s',
+        cursor: 'pointer',
         '&:hover': {
           transform: 'translateY(-8px)',
           boxShadow: '0 12px 24px rgba(0,0,0,0.15)'
@@ -101,7 +118,7 @@ function ProductCard({ product, onAddToCart }: ProductCardProps) {
           </Typography>
         </Box>
 
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box sx={{ mb: 2 }}>
           <Typography 
             variant="h5" 
             color="primary"
@@ -109,11 +126,32 @@ function ProductCard({ product, onAddToCart }: ProductCardProps) {
           >
             ${product.price.toFixed(2)}
           </Typography>
+        </Box>
+
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <Button
+            variant="outlined"
+            startIcon={<FaEye />}
+            onClick={handleDetailClick}
+            fullWidth
+            sx={{
+              textTransform: 'none',
+              borderColor: '#667eea',
+              color: '#667eea',
+              '&:hover': {
+                borderColor: '#764ba2',
+                backgroundColor: 'rgba(102, 126, 234, 0.04)',
+              }
+            }}
+          >
+            Detay
+          </Button>
           
           <Button
             variant="contained"
             startIcon={<FaShoppingCart />}
             onClick={handleAddToCart}
+            fullWidth
             sx={{
               background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
               textTransform: 'none',

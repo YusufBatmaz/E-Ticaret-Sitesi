@@ -7,6 +7,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useAppDispatch } from './redux/hooks';
 import { loadUserFromStorage } from './redux/appSlice';
+import { loadBasket } from './redux/slices/basketSlice';
 
 function App() {
   const dispatch = useAppDispatch();
@@ -19,6 +20,9 @@ function App() {
   useEffect(() => {
     // Sayfa yüklendiğinde kullanıcıyı localStorage'dan yükle
     dispatch(loadUserFromStorage());
+    
+    // Sepeti localStorage'dan yükle
+    dispatch(loadBasket());
     
     // Kullanıcı bilgilerini console'a yazdır
     const userStr = localStorage.getItem('user');

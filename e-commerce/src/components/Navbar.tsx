@@ -17,7 +17,8 @@ import {
   FaSignOutAlt, 
   FaShoppingBag,
   FaUser,
-  FaTimes
+  FaTimes,
+  FaShoppingCart
 } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../redux/hooks';
@@ -32,6 +33,7 @@ function Navbar() {
   const user = useAppSelector((state) => state.app.user);
   const isAuthenticated = useAppSelector((state) => state.app.isAuthenticated);
   const searchQuery = useAppSelector((state) => state.app.searchQuery);
+  const basketItemsCount = useAppSelector((state) => state.basket.items?.length || 0);
 
   useEffect(() => {
     setSearchValue(searchQuery);
@@ -72,6 +74,10 @@ function Navbar() {
 
   const handleLogoClick = () => {
     navigate('/');
+  };
+
+  const handleCartClick = () => {
+    toast.info('Sepet sayfası yakında eklenecek');
   };
 
   return (
@@ -157,8 +163,46 @@ function Navbar() {
           )}
         </Box>
 
-        {/* Sağ Taraf - Ayarlar ve Çıkış */}
+        {/* Sağ Taraf - Sepet, Ayarlar ve Çıkış */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          {/* Sepet İkonu */}
+          <IconButton
+            onClick={handleCartClick}
+            sx={{ 
+              color: 'white',
+              position: 'relative',
+              '&:hover': {
+                backgroundColor: 'rgba(255, 255, 255, 0.1)'
+              }
+            }}
+          >
+            <FaShoppingCart size={24} />
+            {/* Sepet Badge - Farklı ürün çeşidi sayısı */}
+            {basketItemsCount > 0 && (
+              <Box
+                sx={{
+                  position: 'absolute',
+                  top: 0,
+                  right: 0,
+                  backgroundColor: '#ff4444',
+                  color: 'white',
+                  borderRadius: '50%',
+                  minWidth: 16,
+                  height: 16,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '0.65rem',
+                  fontWeight: 700,
+                  border: '1.5px solid white',
+                  padding: '0 3px'
+                }}
+              >
+                {basketItemsCount > 99 ? '99+' : basketItemsCount}
+              </Box>
+            )}
+          </IconButton>
+
           {isAuthenticated && user ? (
             <>
               {/* Kullanıcı Bilgisi */}

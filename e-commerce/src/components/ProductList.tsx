@@ -84,15 +84,7 @@ function ProductList() {
     setSelectedCategories(categories);
   };
 
-  const handleAddToCart = (product: ProductType) => {
-    toast.success(`${product.title} sepete eklendi!`);
-    console.log('Sepete eklenen ürün:', {
-      id: product.id,
-      başlık: product.title,
-      fiyat: product.price,
-      kategori: product.category
-    });
-  };
+
 
   if (loading) {
     return (
@@ -131,10 +123,7 @@ function ProductList() {
       <Grid container spacing={3}>
         {products.map((product) => (
           <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3, xl: 2.4 }} key={product.id}>
-            <ProductCard 
-              product={product} 
-              onAddToCart={handleAddToCart}
-            />
+            <ProductCard product={product} />
           </Grid>
         ))}
       </Grid>
