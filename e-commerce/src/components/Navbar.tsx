@@ -24,10 +24,12 @@ import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../redux/hooks';
 import { logout, setSearchQuery, clearSearchQuery } from '../redux/appSlice';
 import { toast } from 'react-toastify';
+import BasketDetails from './BasketDetails';
 
 function Navbar() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [searchValue, setSearchValue] = useState('');
+  const [basketOpen, setBasketOpen] = useState(false);
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.app.user);
@@ -77,7 +79,11 @@ function Navbar() {
   };
 
   const handleCartClick = () => {
-    toast.info('Sepet sayfası yakında eklenecek');
+    setBasketOpen(true);
+  };
+
+  const handleBasketClose = () => {
+    setBasketOpen(false);
   };
 
   return (
@@ -297,6 +303,9 @@ function Navbar() {
           )}
         </Box>
       </Toolbar>
+
+      {/* Sepet Drawer */}
+      <BasketDetails open={basketOpen} onClose={handleBasketClose} />
     </AppBar>
   );
 }
